@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onSensorChanged(SensorEvent event) {
         x = event.values[0];
@@ -69,11 +70,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         max.setText(Float.toString(maxAccel));
         if (accel > MIN_ACC){
-            try {
-                ThrowEvent(maxAccel);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            ThrowEvent(maxAccel);
         }
     }
 
@@ -82,10 +79,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    public void ThrowEvent(float acc) throws InterruptedException {
+    public void ThrowEvent(float acc) {
         height.setText("");
-        Float initialSpeed = acc;
-        final Float maxHeight = ((initialSpeed * 2) / (eGravity * 2));
+        float initialSpeed = acc;
+        final MediaPlayer ding = MediaPlayer.create(this,R.raw.bell);
+        final float maxHeight = ((initialSpeed * 2) / (eGravity * 2));
 
              t.setVisibility(View.VISIBLE);
 
@@ -104,7 +102,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 animator.setDuration(500);
                 animator.start();
 
-        Thread thread2 = new Thread() {
+        final Thread thread2 = new Thread() {
+            @SuppressLint("SetTextI18n")
             public void run ()
             {
 
@@ -114,8 +113,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     e.printStackTrace();
                 }
                 height.setText(Float.toString(maxHeight) + " Meters");
-            //    MediaPlayer ding = MediaPlayer.create(this, R.raw.bell);
-          //      ding.start();
+                ding.start();
                 maxAccel = 0;
                 accel = 0;
 
