@@ -1,5 +1,9 @@
 package com.example.throwaball;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -11,11 +15,8 @@ import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -26,12 +27,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float x,y,z,accel, maxAccel;
     private float eGravity = SensorManager.GRAVITY_EARTH;
     private float MIN_ACC = 20;
+    ObjectAnimator objectAnimator;
+    ImageView imageView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+         imageView = findViewById(R.id.ball);
+
 
 
         // Create sensor manager
@@ -82,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void ThrowEvent(float acc) {
         height.setText("");
         float initialSpeed = acc;
-        final MediaPlayer ding = MediaPlayer.create(this,R.raw.bell);
         final float maxHeight = ((initialSpeed * 2) / (eGravity * 2));
 
              t.setVisibility(View.VISIBLE);
@@ -113,12 +118,41 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     e.printStackTrace();
                 }
                 height.setText(Float.toString(maxHeight) + " Meters");
-                ding.start();
                 maxAccel = 0;
                 accel = 0;
 
             }
         };
+        playAnimation(maxHeight, 500);
         thread2.start();
+    }
+
+    public void playAnimation(float height, int dur) {
+        final MediaPlayer ding = MediaPlayer.create(this,R.raw.ding);
+        objectAnimator = ObjectAnimator.ofFloat(imageView, "y", height);
+        objectAnimator.setDuration(dur);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(objectAnimator);
+        animatorSet.start();
+       // animatorSet.pause();
+        animatorSet.addListener(new AnimatorListenerAdapter(){
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+            }
+
+            @Override
+            public void onAnimationPause(Animator animation) {
+                super.onAnimationPause(animation);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+                ding.start();
+                animation.removeListener(this);
+                objectAnimator.reverse();
+            }
+        });
     }
 }
