@@ -7,7 +7,9 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.media.MediaPlayer;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.hardware.Sensor;
@@ -15,6 +17,7 @@ import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +32,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float MIN_ACC = 20;
     ObjectAnimator objectAnimator;
     ImageView imageView;
+    private Button btn_pref;
+    public static final int RESULT_CODE_SETTINGS = 0;
+    public static final String INT_EXTRA = "intextra";
+
 
 
     @Override
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
          imageView = findViewById(R.id.ball);
-
+         btn_pref = findViewById(R.id.btnPref);
 
 
         // Create sensor manager
@@ -58,7 +65,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         t = findViewById(R.id.txt_t);
        // t.setVisibility(View.INVISIBLE);
 
-
+        btn_pref.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent startSettings = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivityForResult(startSettings, RESULT_CODE_SETTINGS);
+            }
+        });
 
     }
 
@@ -154,5 +167,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 objectAnimator.reverse();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == RESULT_CODE_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                MIN_ACC = data.getIntExtra(INT_EXTRA, 0);
+            }
+        }
     }
 }
